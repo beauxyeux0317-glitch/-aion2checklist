@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아이온2 숙제 관제판 · 2026.09 패치 반영</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abyss:#070A1C;
+  --panel:rgba(255,255,255,.035);
+  --panel-2:rgba(255,255,255,.055);
+  --line:rgba(120,150,220,.16);
+  --line-2:rgba(120,150,220,.28);
+  --aether:#5CE1E6;
+  --aether-dim:rgba(92,225,230,.14);
+  --divine:#E8C36B;
+  --ember:#FF7A66;
+  --ink:#EDF1FF;
+  --mist:#98A3CA;
+  --mist-2:#6C77A0;
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Noto Sans KR',system-ui,sans-serif;background:var(--abyss);color:var(--ink);min-height:100vh;line-height:1.55;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(1100px 620px at 78% -12%, rgba(92,225,230,.13), transparent 62%),
+    radial-gradient(900px 560px at 8% 4%, rgba(232,195,107,.07), transparent 60%),
+    radial-gradient(760px 520px at 50% 108%, rgba(120,90,220,.12), transparent 65%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1px 1px at 32% 62%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1px 1px at 58% 26%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 74% 74%, rgba(255,255,255,.45), transparent),
+    radial-gradient(1px 1px at 88% 38%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 44% 88%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1px 1px at 6% 82%, rgba(255,255,255,.45), transparent),
+    radial-gradient(1px 1px at 66% 6%, rgba(255,255,255,.5), transparent);
+}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:38px 20px 90px}
+
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--aether);text-transform:uppercase;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eyebrow .dot{width:5px;height:5px;background:var(--aether);transform:rotate(45deg);border-radius:1px}
+.eyebrow .sep{color:var(--mist-2)}
+h1{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:clamp(34px,6.2vw,62px);line-height:1.02;letter-spacing:-.015em;margin:16px 0 12px}
+h1 em{font-style:normal;color:var(--aether);text-shadow:0 0 34px rgba(92,225,230,.5)}
+.lede{color:var(--mist);font-size:15px;max-width:68ch}
+.lede b{color:var(--divine);font-weight:700}
+
+.clocks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:28px 0 10px}
+.clock{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(160deg,var(--panel-2),var(--panel));padding:18px 20px 16px}
+.clock::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--aether),transparent)}
+.clock.wk::before{background:linear-gradient(180deg,var(--divine),transparent)}
+.clock .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;color:var(--mist-2);text-transform:uppercase;display:block;margin-bottom:8px}
+.clock .v{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:clamp(24px,4.4vw,34px);letter-spacing:-.02em;color:var(--aether);font-variant-numeric:tabular-nums}
+.clock.wk .v{color:var(--divine)}
+.clock .sub{font-size:12.5px;color:var(--mist-2);margin-top:4px}
+
+.strip{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 30px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:16px 20px}
+.meter .t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;gap:12px}
+.meter .t span{font-size:12.5px;color:var(--mist)}
+.meter .t b{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);font-weight:600}
+.bar{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--aether);transition:width .35s cubic-bezier(.3,.9,.3,1)}
+.bar.g i{background:var(--divine)}
+
+.card{border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(160deg,var(--panel-2),var(--panel));padding:20px 22px 22px}
+.card.pinned{border-color:rgba(232,195,107,.26)}
+.cardhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.cardhead h2{font-size:19px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cardhead h2 small{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10.5px;letter-spacing:.14em;color:var(--mist-2);text-transform:uppercase;margin-bottom:5px}
+.pin{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:var(--divine);border:1px solid rgba(232,195,107,.4);border-radius:5px;padding:2px 7px}
+.cntp{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mist-2)}
+.cntp b{color:var(--ink)}
+
+.wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+li.task{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);padding:11px 13px;transition:all .18s ease}
+li.task:hover{border-color:var(--line-2);background:var(--panel-2)}
+li.task.hit{border-color:rgba(92,225,230,.4);background:rgba(92,225,230,.055)}
+li.task .box{appearance:none;flex:0 0 19px;width:19px;height:19px;margin-top:2px;cursor:pointer;border:1.5px solid var(--line-2);border-radius:6px;background:transparent;display:grid;place-items:center;transition:all .16s ease}
+li.task .box::after{content:'';width:8px;height:8px;transform:rotate(45deg) scale(.2);border-radius:1px;background:var(--abyss);opacity:0;transition:all .16s ease}
+li.task .box:checked{background:var(--aether);border-color:var(--aether);box-shadow:0 0 16px rgba(92,225,230,.45)}
+li.task .box:checked::after{opacity:1;transform:rotate(45deg) scale(1)}
+li.task .body{flex:1;min-width:0}
+li.task .nm{font-size:13.8px;font-weight:700;line-height:1.35}
+li.task .meta{font-size:12px;color:var(--mist-2);margin-top:3px}
+li.task.done{border-color:rgba(92,225,230,.24);background:rgba(92,225,230,.045)}
+li.task.done .nm{color:var(--mist);text-decoration:line-through;text-decoration-color:rgba(92,225,230,.5)}
+li.task.done .box{background:var(--aether);border-color:var(--aether)}
+.dchips{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.dchip{font-family:'IBM Plex Mono',monospace;font-size:9.5px;line-height:1;color:var(--mist-2);border:1px solid var(--line);border-radius:4px;padding:2.5px 4.5px}
+.dchip.on{color:var(--abyss);background:var(--aether);border-color:var(--aether);font-weight:600}
+.dchip.off{opacity:.4}
+li.task.done .dchip.on{opacity:.55}
+
+.tagchip{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;border:1px solid var(--line-2);border-radius:5px;padding:2px 6px;color:var(--mist-2);margin-left:6px;vertical-align:middle}
+.tagchip.d{color:var(--aether);border-color:rgba(92,225,230,.35)}
+.tagchip.w{color:var(--divine);border-color:rgba(232,195,107,.35)}
+.listsub{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--mist-2);text-transform:uppercase;margin:9px 0 1px 3px}
+.listsub::before{content:'— ';color:var(--line-2)}
+
+.stage{display:grid;grid-template-columns:188px 1fr;gap:22px;align-items:start;margin-top:26px}
+.rail{position:sticky;top:22px;display:flex;flex-direction:column;gap:7px}
+.rail .cap{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--mist-2);text-transform:uppercase;margin:0 0 4px 4px}
+.day{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--mist);border-radius:12px;padding:10px 13px;cursor:pointer;text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:9px;transition:all .18s ease}
+.day .n{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;width:19px;height:19px;flex:0 0 19px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:6px;color:var(--mist-2)}
+.day .tag{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--mist-2);border:1px solid var(--line);border-radius:5px;padding:2px 5px}
+.day .tag:empty{display:none}
+.day:hover{border-color:var(--line-2);color:var(--ink);transform:translateX(2px)}
+.day.on{background:linear-gradient(120deg,var(--aether-dim),rgba(255,255,255,.04));border-color:rgba(92,225,230,.45);color:var(--ink)}
+.day.on .n{border-color:var(--aether);color:var(--aether)}
+.day.is-today .tag{color:var(--aether);border-color:rgba(92,225,230,.4)}
+.day.is-reset .tag{color:var(--divine);border-color:rgba(232,195,107,.4)}
+
+.daylist{display:flex;flex-direction:column;gap:8px}
+.daynote{font-size:12.5px;color:var(--mist);border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:rgba(255,255,255,.02);margin-bottom:13px;display:flex;gap:8px;align-items:flex-start}
+.daynote.hot{color:var(--divine);border-color:rgba(232,195,107,.3)}
+.daynote .ic{color:var(--aether);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5}
+.daynote.hot .ic{color:var(--divine)}
+
+.actions{display:flex;gap:9px;margin-top:24px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:12.5px;font-weight:700;border:1px solid var(--line-2);background:var(--panel);color:var(--mist);border-radius:10px;padding:9px 15px;transition:all .18s ease}
+.btn:hover{color:var(--ink);border-color:var(--aether);background:var(--aether-dim)}
+.btn.ghost:hover{border-color:var(--ember);color:var(--ember);background:rgba(255,122,102,.08)}
+.saved{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--aether);opacity:0;transition:opacity .3s ease}
+.saved.show{opacity:1}
+
+footer{margin-top:52px;border-top:1px solid var(--line);padding-top:20px;font-size:12px;color:var(--mist-2);line-height:1.85}
+footer b{color:var(--mist);font-weight:700}
+footer a{color:var(--aether);text-decoration:none;border-bottom:1px solid rgba(92,225,230,.3)}
+footer a:hover{border-bottom-color:var(--aether)}
+
+@media (max-width:900px){ .wk-grid{grid-template-columns:1fr} }
+@media (max-width:820px){
+  .stage{grid-template-columns:1fr;gap:16px}
+  .rail{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px;gap:7px;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .rail .cap{display:none}
+  .day{flex:0 0 auto;padding:9px 12px}
+  .day .tag{display:none}
+  .clocks,.strip{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">
+    <i class="dot"></i><span>Aion 2</span><span class="sep">/</span>
+    <span>Chapter 1</span><span class="sep">/</span>
+    <span>2026.09 패치 반영</span>
+  </div>
+
+  <h1>아이온2 <em>숙제 관제판</em></h1>
+  <p class="lede">
+    <b>주간 숙제는 위에 항상 표시</b>되고, 아래 <b>요일 탭을 누르면 그 요일에 해당하는 숙제</b>가 매일 항목과 함께 나옵니다.
+    주간 항목 아래 작은 요일 칩은 그날 처리하면 좋은 항목이고, 지금 고른 요일이 밝게 켜집니다.
+    일일 초기화는 매일 05:00, 주간 초기화는 수요일 05:00입니다.
+  </p>
+
+  <div class="clocks">
+    <div class="clock">
+      <span class="k">Daily Reset · 매일 05:00</span>
+      <div class="v" id="cd-day">--:--:--</div>
+      <div class="sub" id="cd-day-sub">다음 초기화까지</div>
+    </div>
+    <div class="clock wk">
+      <span class="k">Weekly Reset · 수요일 05:00</span>
+      <div class="v" id="cd-week">--일 --:--:--</div>
+      <div class="sub" id="cd-week-sub">다음 주간 초기화까지</div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="meter">
+      <div class="t"><span id="lb-day">선택한 요일 일일 숙제</span><b id="p-day">0 / 0</b></div>
+      <div class="bar"><i id="b-day"></i></div>
+    </div>
+    <div class="meter">
+      <div class="t"><span>주간 숙제 전체</span><b id="p-week">0 / 0</b></div>
+      <div class="bar g"><i id="b-week"></i></div>
+    </div>
+  </div>
+
+  <!-- ===== 주간 : 항상 표시 ===== -->
+  <section class="card pinned">
+    <div class="cardhead">
+      <h2>
+        <span>
+          <small>Weekly · 수요일 05:00 초기화</small>
+          주간 숙제 <span class="pin">항상 표시</span>
+        </span>
+      </h2>
+      <div class="cntp"><b id="c-week">0 / 0</b></div>
+    </div>
+    <div class="wk-grid" id="list-weekly"></div>
+  </section>
+
+  <!-- ===== 일일 : 요일 탭으로 전환 ===== -->
+  <div class="stage">
+    <nav class="rail" id="rail"><span class="cap">요일 선택</span></nav>
+
+    <section>
+      <div class="cardhead" style="margin-bottom:14px">
+        <h2>
+          <span>
+            <small id="p-eyebrow">Daily + Weekly · 이 요일 숙제</small>
+            <span id="p-dayname" style="color:var(--aether)">월요일</span> 숙제
+          </span>
+        </h2>
+        <div class="cntp"><b id="c-day">0 / 0</b></div>
+      </div>
+      <div class="daynote" id="p-note"><span class="ic">▸</span><span id="p-notetx">—</span></div>
+      <div class="daylist" id="list-daily"></div>
+
+      <div class="actions">
+        <button class="btn" id="btn-day">이 요일 초기화</button>
+        <button class="btn" id="btn-week">주간 전체 초기화</button>
+        <button class="btn ghost" id="btn-all">전부 초기화</button>
+        <span class="saved" id="saved">저장됨</span>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <b>초기화 기준</b> — 일일 <code>05:00</code> / 주간 <code>수요일 05:00</code>.
+    카운트다운은 브라우저 시각 기준이라 실제 서버 리셋과 수 분 차이가 날 수 있습니다.<br>
+    <b>구성</b> — 위 주간 숙제는 항상 표시되고, 아래는 고른 요일의 숙제(매일 항목 + 그 요일에 해당하는 주간 항목)를 보여줍니다.
+    같은 주간 항목은 위·아래 어느 쪽에서 체크해도 함께 반영되며, 체크는 주차별로 저장됩니다.
+    일일 던전·각성전·성역·시련·전장은 요일 구분 없이, 나머지 항목은 권장 요일 칩이 표시됩니다.<br>
+    <b>요일 지정 근거</b> — 아티쟁(아티팩트 점령전)은 수·토 <code>22:00</code> 매칭 서버별 순차 시작(공식 가이드북),
+    전장은 매일 <code>11:00~14:00</code> / <code>20:00~22:00</code>(공식 가이드북), 어비스 보스·회랑은 수·토, 어비스 나흐마는 금·일 기준으로 표기했습니다.
+    요일 옆 표시는 <code>오늘</code>과 <code>RESET</code>만 나오며, 날짜가 바뀌면 자동으로 옮겨갑니다.<br>
+    <b>참고 자료</b> — <a href="https://aion2.plaync.com/ko-kr/board/update/list" target="_blank" rel="noopener">아이온2 공식 업데이트 노트</a><br>
+    입장 횟수·보상·보스 젠 시간은 패치마다 조정되니, 최종 확인은 인게임 숙제 창과 필드 알림에서 하시길 권합니다.
+  </footer>
+</div>
+
+<script>
+/* ================= 데이터 ================= */
+const DAYLBL = {0:'일',1:'월',2:'화',3:'수',4:'목',5:'금',6:'토'};
+const ALLD   = [0,1,2,3,4,5,6];
+
+const DAILY = [
+  {id:'samyung', nm:'사명 퀘스트 5회', meta:'저널 · 수배령 우선 (유일 등급 확률)', tag:'일일'}
+];
+
+/* days = 권장 요일. 빈 배열이면 요일 칩 표시 없음 */
+const WEEKLY = [
+  {id:'daily-dgn',  nm:'일일 던전',            meta:'데바 생체 연구 기지 · 크로파킨의 비밀 보관소', days:[]},
+  {id:'awaken',     nm:'각성전 주 3회',        meta:'토벌전 보상 통합 · 실렌티움 · 아리엘의 흔적',  days:[]},
+  {id:'nightmare',  nm:'악몽',                meta:'입장권 매일 05:00 충전',                     days:[0,1,2,3,4,5,6]},
+
+  {id:'san-rudra',  nm:'성역 · 루드라',        meta:'챕터1 기본 성역',                          days:[]},
+  {id:'san-purif',  nm:'성역 · 침식의 정화소',  meta:'아이템 레벨 3,700',                        days:[]},
+  {id:'san-muspel', nm:'성역 · 무스펠의 성배',  meta:'아이템 레벨 4,500 · 제한시간 내 재도전',     days:[]},
+  {id:'san-snow',   nm:'성역 · 비탄의 설원',    meta:'아이템 레벨 5,800 ~ 6,200 · 3난이도',       days:[]},
+
+  {id:'trial',      nm:'시련 · 불의 신전',     meta:'아이템 레벨 4,800 · 4~16단계 · 극복의 증표', days:[]},
+
+  {id:'abyss-boss', nm:'어비스 보스',          meta:'하층·중층 보스 처치 (나흐마 제외)',          days:[3,6]},
+  {id:'nahma',      nm:'어비스 나흐마',        meta:'하층 3마리 · 중층 분노한 수호신장 나흐마 2마리 · 22:00', days:[5,0]},
+  {id:'rift',       nm:'어비스 균열 지대',     meta:'균열의 꾸러미 · 보스 스탯 상향 · 22:00 오픈', days:[2,4]},
+  {id:'corridor',   nm:'어비스 회랑',          meta:'어비스 점령 콘텐츠',                        days:[3,6]},
+
+  {id:'void-clash', nm:'시공 균열 쟁탈전',     meta:'주 3회 · 20:00 / 23:00 오픈',               days:[1,4,6]},
+  {id:'void-ad',    nm:'시공 공격 / 방어',     meta:'공격·방어 진영 참여',                        days:[0,1,2,3,4,5,6]},
+
+  {id:'artclash',   nm:'아티쟁',              meta:'아티팩트 점령전 · 수·토 22:00 매칭 서버별 순차 시작', days:[3,6]},
+  {id:'battlefield',nm:'전장 주 3승',         meta:'전장 가능 시간대 11:00~14:00 / 20:00~22:00', days:[]},
+
+  {id:'order',      nm:'지령서 상점 구매',     meta:'일반 주 12개 + 어비스 등급별 5개씩',        days:[3]},
+  {id:'odemt',      nm:'물질 변환 · 오드 에너지', meta:'주 7회 · 본캐 20 / 배럭 4',               days:[3]}
+];
+
+const DAYNOTE = {
+  0:{tx:'어비스 나흐마 · 어비스 보스', hot:false},
+  1:{tx:'새 주간 첫 점검일 · 성역·시련 남은 횟수 확인 · 시공 쟁탈전', hot:false},
+  2:{tx:'주간 마감일 · 수요일 05:00 전까지 남은 주간 숙제 소진 · 균열 지대', hot:true},
+  3:{tx:'주간 초기화 · 22:00 아티쟁 + 어비스 보스', hot:true},
+  4:{tx:'성역·각성전 중심 정리일 · 균열 지대 · 시공 쟁탈전', hot:false},
+  5:{tx:'어비스 나흐마', hot:false},
+  6:{tx:'22:00 아티쟁 + 어비스 보스 · 시공 쟁탈전', hot:false}
+};
+
+/* ================= 상태 저장 ================= */
+const LS = (() => {
+  let ok = true;
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); } catch(e){ ok = false; }
+  const mem = {};
+  return {
+    get(k){ try { return ok ? localStorage.getItem(k) : (mem[k]||null); } catch(e){ return mem[k]||null; } },
+    set(k,v){ try { ok ? localStorage.setItem(k,v) : (mem[k]=v); } catch(e){ mem[k]=v; } }
+  };
+})();
+
+const RH = 5;
+const eff = () => new Date(Date.now() - RH*3600*1000);
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+function weekStart(){
+  const e = eff(); const off = (e.getDay() - 3 + 7) % 7;
+  const s = new Date(e); s.setDate(s.getDate() - off); return s;
+}
+function dateForDay(d){
+  const ws = weekStart(); const off = (d - 3 + 7) % 7;
+  const dt = new Date(ws); dt.setDate(dt.getDate() + off); return dt;
+}
+const wkKey    = () => 'a2.w.' + ymd(weekStart());
+const dayKeyOf = d => 'a2.d.' + ymd(dateForDay(d));
+
+function load(key, ids){
+  let raw = {}; try { raw = JSON.parse(LS.get(key) || '{}') || {}; } catch(e){ raw = {}; }
+  const out = {}; ids.forEach(i => out[i] = !!raw[i]); return out;
+}
+function save(key, state){ LS.set(key, JSON.stringify(state)); flash(); }
+let saveTimer;
+function flash(){
+  const el = document.getElementById('saved');
+  el.classList.add('show'); clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+/* ================= 상태 ================= */
+const dailyIds  = DAILY.map(t => t.id);
+const weeklyIds = WEEKLY.map(t => t.id);
+let todayDow  = eff().getDay();
+
+let stateWeek = load(wkKey(), weeklyIds);
+let stateDay  = {};
+let cur = todayDow;
+
+const $ = id => document.getElementById(id);
+const dkey = d => dateForDay(d);
+
+/* ================= 주간 (항상 표시) ================= */
+function buildWeekly(){
+  const host = $('list-weekly'); host.innerHTML = '';
+  WEEKLY.forEach(t => {
+    const on = stateWeek[t.id];
+    const hit = t.days.indexOf(cur) !== -1;
+    const li = document.createElement('li');
+    li.className = 'task' + (on ? ' done' : '') + (hit ? ' hit' : '');
+    const box = document.createElement('input');
+    box.type = 'checkbox'; box.className = 'box'; box.checked = on;
+    box.setAttribute('aria-label', t.nm);
+    box.addEventListener('change', () => {
+      stateWeek[t.id] = box.checked; save(wkKey(), stateWeek);
+      li.classList.toggle('done', box.checked); paintWeekCount();
+    });
+    const body = document.createElement('div'); body.className = 'body';
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = t.nm;
+    const mt = document.createElement('div'); mt.className = 'meta'; mt.textContent = t.meta;
+    body.appendChild(nm); body.appendChild(mt);
+
+    if (t.days.length){
+      const ch = document.createElement('div'); ch.className = 'dchips';
+      ALLD.forEach(d => {
+        const s = document.createElement('span');
+        const has = t.days.indexOf(d) !== -1;
+        s.className = 'dchip' + (has ? ' on' : ' off');
+        s.textContent = DAYLBL[d];
+        ch.appendChild(s);
+      });
+      body.appendChild(ch);
+    }
+    li.appendChild(box); li.appendChild(body);
+    host.appendChild(li);
+  });
+  paintWeekCount();
+}
+
+function paintWeekCount(){
+  const n = weeklyIds.filter(i => stateWeek[i]).length;
+  $('c-week').textContent = n + ' / ' + weeklyIds.length;
+  $('p-week').textContent = n + ' / ' + weeklyIds.length;
+  $('b-week').style.width = (n / weeklyIds.length * 100) + '%';
+}
+
+/* ================= 일일 (요일 전환) ================= */
+function weekItemsForDay(d){ return WEEKLY.filter(t => t.days.indexOf(d) !== -1); }
+
+function rowFor(t, kind){
+  const on = kind === 'd' ? stateDay[t.id] : stateWeek[t.id];
+  const li = document.createElement('li');
+  li.className = 'task' + (on ? ' done' : '');
+  const box = document.createElement('input');
+  box.type = 'checkbox'; box.className = 'box'; box.checked = on;
+  box.setAttribute('aria-label', t.nm);
+  box.addEventListener('change', () => {
+    if (kind === 'd'){ stateDay[t.id] = box.checked; save(dayKeyOf(cur), stateDay); }
+    else { stateWeek[t.id] = box.checked; save(wkKey(), stateWeek); syncWeekly(); }
+    li.classList.toggle('done', box.checked);
+    paintDayCount(); paintWeekCount();
+  });
+  const body = document.createElement('div'); body.className = 'body';
+  const nm = document.createElement('div'); nm.className = 'nm';
+  nm.appendChild(document.createTextNode(t.nm));
+  const cp = document.createElement('span');
+  cp.className = 'tagchip ' + (kind === 'd' ? 'd' : 'w');
+  cp.textContent = kind === 'd' ? '매일' : '주간';
+  nm.appendChild(cp);
+  const mt = document.createElement('div'); mt.className = 'meta'; mt.textContent = t.meta;
+  body.appendChild(nm); body.appendChild(mt);
+  li.appendChild(box); li.appendChild(body);
+  return li;
+}
+
+function syncWeekly(){
+  document.querySelectorAll('#list-weekly .task').forEach((li, i) => {
+    const on = !!stateWeek[weeklyIds[i]];
+    const b = li.querySelector('.box');
+    if (b) b.checked = on;
+    li.classList.toggle('done', on);
+  });
+}
+
+function buildDaily(){
+  const isToday = ymd(dkey(cur)) === ymd(eff());
+  $('p-dayname').textContent = DAYLBL[cur] + '요일' + (isToday ? ' · 오늘' : '');
+  $('p-eyebrow').textContent = 'Daily + Weekly · 이 요일 숙제';
+
+  const nt = DAYNOTE[cur];
+  $('p-notetx').textContent = nt.tx;
+  $('p-note').classList.toggle('hot', nt.hot);
+
+  const host = $('list-daily'); host.innerHTML = '';
+  DAILY.forEach(t => host.appendChild(rowFor(t, 'd')));
+
+  const wk = weekItemsForDay(cur);
+  if (wk.length){
+    const sep = document.createElement('div');
+    sep.className = 'listsub';
+    sep.textContent = '이 요일 주간 숙제';
+    host.appendChild(sep);
+    wk.forEach(t => host.appendChild(rowFor(t, 'w')));
+  }
+  paintDayCount();
+}
+
+function paintDayCount(){
+  const wk = weekItemsForDay(cur);
+  const total = dailyIds.length + wk.length;
+  let n = dailyIds.filter(i => stateDay[i]).length;
+  wk.forEach(t => { if (stateWeek[t.id]) n++; });
+  const txt = n + ' / ' + total;
+  $('c-day').textContent = txt;
+  $('lb-day').textContent = DAYLBL[cur] + '요일 숙제';
+  $('p-day').textContent = txt;
+  $('b-day').style.width = (total ? n / total * 100 : 0) + '%';
+}
+
+/* ================= 요일 레일 ================= */
+const rail = $('rail');
+[1,2,3,4,5,6,0].forEach(d => {
+  const b = document.createElement('button');
+  b.className = 'day' + (d === 3 ? ' is-reset' : '');
+  b.dataset.d = d; b.type = 'button';
+  b.innerHTML = '<span class="n">' + DAYLBL[d] + '</span>' + DAYLBL[d] + '요일'
+              + '<span class="tag"></span>';
+  b.addEventListener('click', () => selectDay(d));
+  rail.appendChild(b);
+});
+
+/* 오늘 / RESET 만 표시 (날짜 없음) — 날짜가 바뀌면 자동 갱신 */
+function refreshRailTags(){
+  const td = eff().getDay();
+  document.querySelectorAll('.day').forEach(b => {
+    const d = Number(b.dataset.d);
+    const sp = b.querySelector('.tag');
+    if (sp) sp.textContent = (d === td) ? '오늘' : (d === 3 ? 'RESET' : '');
+  });
+}
+
+function selectDay(d){
+  cur = d;
+  stateDay = load(dayKeyOf(d), dailyIds);
+  document.querySelectorAll('.day').forEach(b => {
+    b.classList.toggle('on', Number(b.dataset.d) === d);
+    b.classList.toggle('is-today', Number(b.dataset.d) === todayDow);
+  });
+  buildDaily();
+  refreshRailTags();
+  document.querySelectorAll('#list-weekly .task').forEach((li, i) => {
+    li.classList.toggle('hit', WEEKLY[i].days.indexOf(d) !== -1);
+  });
+}
+
+/* ================= 버튼 ================= */
+$('btn-day').addEventListener('click', () => {
+  dailyIds.forEach(i => stateDay[i] = false);
+  weekItemsForDay(cur).forEach(t => stateWeek[t.id] = false);
+  save(dayKeyOf(cur), stateDay); save(wkKey(), stateWeek);
+  buildWeekly(); buildDaily();
+});
+$('btn-week').addEventListener('click', () => {
+  weeklyIds.forEach(i => stateWeek[i] = false);
+  save(wkKey(), stateWeek); buildWeekly(); selectDay(cur);
+});
+$('btn-all').addEventListener('click', () => {
+  dailyIds.forEach(i => stateDay[i] = false);
+  weeklyIds.forEach(i => stateWeek[i] = false);
+  save(dayKeyOf(cur), stateDay); save(wkKey(), stateWeek);
+  buildWeekly(); selectDay(cur);
+});
+
+/* ================= 카운트다운 ================= */
+function tick(){
+  const now = new Date(), T = 24*3600*1000;
+  const d0 = new Date(now); d0.setHours(RH,0,0,0);
+  const nd = now < d0 ? d0 : new Date(d0.getTime() + T);
+  let s = Math.max(0, Math.floor((nd - now)/1000));
+  $('cd-day').textContent =
+    String(Math.floor(s/3600)).padStart(2,'0') + ':' +
+    String(Math.floor(s%3600/60)).padStart(2,'0') + ':' +
+    String(s%60).padStart(2,'0');
+  $('cd-day-sub').textContent = '다음 초기화 ' + (nd.getMonth()+1) + '월 ' + nd.getDate() + '일 05:00';
+
+  const nw = new Date(weekStart()); nw.setDate(nw.getDate() + 7); nw.setHours(RH,0,0,0);
+  let s2 = Math.max(0, Math.floor((nw - now)/1000));
+  $('cd-week').textContent =
+    Math.floor(s2/86400) + '일 ' +
+    String(Math.floor(s2%86400/3600)).padStart(2,'0') + ':' +
+    String(Math.floor(s2%3600/60)).padStart(2,'0') + ':' +
+    String(s2%60).padStart(2,'0');
+  $('cd-week-sub').textContent = '다음 초기화 ' + (nw.getMonth()+1) + '월 ' + nw.getDate() + '일(수) 05:00';
+}
+
+let lastWeek = wkKey(), lastDayRef = ymd(eff());
+setInterval(() => {
+  tick();
+  if (wkKey() !== lastWeek){ lastWeek = wkKey(); stateWeek = load(wkKey(), weeklyIds); buildWeekly(); selectDay(cur); }
+  if (ymd(eff()) !== lastDayRef){ lastDayRef = ymd(eff()); todayDow = eff().getDay(); selectDay(todayDow); }
+}, 1000);
+
+/* ================= 시작 ================= */
+buildWeekly();
+selectDay(cur);
+tick();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
